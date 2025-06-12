@@ -5,6 +5,9 @@ public class UserSaveException extends Exception{
         super(message);
     }
 
+    public UserSaveException() {
+    }
+
     public UserSaveException(String message, Throwable cause) {
         super(message, cause);
     }
