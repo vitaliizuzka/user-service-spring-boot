@@ -1,6 +1,4 @@
-package ru.aston.userservicespringboot.model.dto;
-
-import java.time.LocalDateTime;
+package ru.aston.user_service_spring_boot.model.dto;
 
 public record UserCreateReadDto(
         String name,

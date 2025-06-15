@@ -1,20 +1,17 @@
-package ru.aston.userservicespringboot.controller;
+package ru.aston.user_service_spring_boot.controller;
 
-import lombok.RequiredArgsConstructor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
-import ru.aston.userservicespringboot.exception.UserDeleteException;
-import ru.aston.userservicespringboot.exception.UserSaveException;
-import ru.aston.userservicespringboot.exception.UserUpdateException;
-import ru.aston.userservicespringboot.model.dto.UserCreateReadDto;
-import ru.aston.userservicespringboot.model.dto.UserDto;
-import ru.aston.userservicespringboot.service.UserService;
-import ru.aston.userservicespringboot.service.impl.UserServiceImpl;
+import ru.aston.user_service_spring_boot.exception.UserDeleteException;
+import ru.aston.user_service_spring_boot.exception.UserSaveException;
+import ru.aston.user_service_spring_boot.exception.UserUpdateException;
+import ru.aston.user_service_spring_boot.model.dto.UserCreateReadDto;
+import ru.aston.user_service_spring_boot.model.dto.UserDto;
+import ru.aston.user_service_spring_boot.service.UserService;
 
 import java.util.List;
 

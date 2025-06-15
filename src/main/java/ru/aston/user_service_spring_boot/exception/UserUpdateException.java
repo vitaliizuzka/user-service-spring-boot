@@ -1,4 +1,4 @@
-package ru.aston.userservicespringboot.exception;
+package ru.aston.user_service_spring_boot.exception;
 
 public class UserUpdateException extends Exception{
 

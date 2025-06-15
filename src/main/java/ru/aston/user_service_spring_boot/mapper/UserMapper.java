@@ -1,10 +1,10 @@
-package ru.aston.userservicespringboot.mapper;
+package ru.aston.user_service_spring_boot.mapper;
 
 import org.mapstruct.Mapper;
 import org.mapstruct.factory.Mappers;
-import ru.aston.userservicespringboot.model.dto.UserCreateReadDto;
-import ru.aston.userservicespringboot.model.dto.UserDto;
-import ru.aston.userservicespringboot.model.entity.User;
+import ru.aston.user_service_spring_boot.model.dto.UserCreateReadDto;
+import ru.aston.user_service_spring_boot.model.dto.UserDto;
+import ru.aston.user_service_spring_boot.model.entity.User;
 
 import java.util.List;
 

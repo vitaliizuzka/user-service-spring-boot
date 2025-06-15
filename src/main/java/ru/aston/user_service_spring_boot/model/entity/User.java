@@ -1,9 +1,6 @@
-package ru.aston.userservicespringboot.model.entity;
+package ru.aston.user_service_spring_boot.model.entity;
 
 import jakarta.persistence.*;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
 
 import java.io.Serializable;
 import java.time.LocalDateTime;

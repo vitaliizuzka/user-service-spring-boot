@@ -1,4 +1,4 @@
-package ru.aston.userservicespringboot.model.dto;
+package ru.aston.user_service_spring_boot.model.dto;
 
 import java.time.LocalDateTime;
 

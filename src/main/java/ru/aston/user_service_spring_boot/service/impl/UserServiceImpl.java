@@ -1,20 +1,18 @@
-package ru.aston.userservicespringboot.service.impl;
+package ru.aston.user_service_spring_boot.service.impl;
 
-import lombok.RequiredArgsConstructor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import ru.aston.userservicespringboot.exception.*;
-import ru.aston.userservicespringboot.mapper.UserMapper;
-import ru.aston.userservicespringboot.model.dto.UserCreateReadDto;
-import ru.aston.userservicespringboot.model.dto.UserDto;
-import ru.aston.userservicespringboot.model.entity.User;
-import ru.aston.userservicespringboot.repository.UserRepository;
-import ru.aston.userservicespringboot.service.UserService;
+import ru.aston.user_service_spring_boot.exception.*;
+import ru.aston.user_service_spring_boot.mapper.UserMapper;
+import ru.aston.user_service_spring_boot.model.dto.UserCreateReadDto;
+import ru.aston.user_service_spring_boot.model.dto.UserDto;
+import ru.aston.user_service_spring_boot.model.entity.User;
+import ru.aston.user_service_spring_boot.repository.UserRepository;
+import ru.aston.user_service_spring_boot.service.UserService;
 
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 

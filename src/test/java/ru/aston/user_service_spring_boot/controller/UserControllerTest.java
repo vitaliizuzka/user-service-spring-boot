@@ -1,4 +1,4 @@
-package ru.aston.userservicespringboot.controller;
+package ru.aston.user_service_spring_boot.controller;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.Test;
@@ -10,19 +10,18 @@ import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
-import ru.aston.userservicespringboot.exception.UserDeleteException;
-import ru.aston.userservicespringboot.exception.UserSaveException;
-import ru.aston.userservicespringboot.exception.UserUpdateException;
-import ru.aston.userservicespringboot.model.dto.UserCreateReadDto;
-import ru.aston.userservicespringboot.model.dto.UserDto;
-import ru.aston.userservicespringboot.service.UserService;
+import ru.aston.user_service_spring_boot.exception.UserDeleteException;
+import ru.aston.user_service_spring_boot.exception.UserSaveException;
+import ru.aston.user_service_spring_boot.exception.UserUpdateException;
+import ru.aston.user_service_spring_boot.model.dto.UserCreateReadDto;
+import ru.aston.user_service_spring_boot.model.dto.UserDto;
+import ru.aston.user_service_spring_boot.service.UserService;
 
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
 
 import static org.hamcrest.Matchers.hasSize;
-import static org.junit.jupiter.api.Assertions.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
 @SpringBootTest
