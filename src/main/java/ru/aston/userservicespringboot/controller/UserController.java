@@ -32,45 +32,45 @@ public class UserController {
 
     @GetMapping
     public ResponseEntity<List<UserCreateReadDto>> findAll() {
-        LOGGER.info("try to find all users controller level");
+        LOGGER.info("trying to find all users controller level");
         try {
             List<UserCreateReadDto> users = userService.findAll();
-            LOGGER.info("users was found successfully service level");
+            LOGGER.info("users found successfully service level");
             return ResponseEntity.ok(users);
         } catch (Exception e) {
-            LOGGER.error("users wasn't found service level", e);
+            LOGGER.error("users weren't found service level", e);
             return ResponseEntity.noContent().build();
         }
     }
 
     @GetMapping("/{id}")
     public ResponseEntity<UserCreateReadDto> findById(@PathVariable Integer id) {
-        LOGGER.info("try to find user by id {} controller level", id);
+        LOGGER.info("trying to find user by id {} controller level", id);
         return userService.findById(id).map(user -> {
             LOGGER.info("user found successfully controller level");
             return ResponseEntity.ok(user);
         }).orElseGet(() -> {
-            LOGGER.error("user wasn't updated or save controller level");
+            LOGGER.error("user not found controller level");
             return ResponseEntity.noContent().build();
         });
     }
 
     @PostMapping
     public ResponseEntity<Object> create(@RequestBody UserCreateReadDto userCreateReadDto){
-        LOGGER.info("try to save user {} controller level", userCreateReadDto);
+        LOGGER.info("trying to save user {} controller level", userCreateReadDto);
         try {
             UserDto userDto = userService.save(userCreateReadDto);
             LOGGER.info("user saved successfully controller level");
             return ResponseEntity.status(HttpStatus.CREATED).body(userDto);
         } catch (UserSaveException e) {
-            LOGGER.error("user wasn't save controller level", e);
+            LOGGER.error("user not saved controller level", e);
            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(e.getClass().getSimpleName());
         }
     }
 
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> deleteById(@PathVariable Integer id){
-        LOGGER.info("try to delete user by id {} controller level", id);
+        LOGGER.info("trying to delete user by id {} controller level", id);
         try {
             userService.removeById(id);
             LOGGER.info("user was deleted successfully controller level");
@@ -83,7 +83,7 @@ public class UserController {
 
     @PutMapping("/{id}")
     public ResponseEntity<Object> update(@PathVariable Integer id, @RequestBody UserCreateReadDto userCreateReadDto){
-        LOGGER.info("try to change user by id {} controller level", id);
+        LOGGER.info("trying to change user by id {} controller level", id);
         try {
             UserDto updatedUserDto = userService.update(id, userCreateReadDto);
             LOGGER.info("user was saved or updated successfully controller level: {}", updatedUserDto);

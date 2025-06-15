@@ -34,13 +34,13 @@ public class UserServiceImpl implements UserService {
     @Transactional(rollbackFor = UserSaveException.class)
     public UserDto save(UserCreateReadDto userCreateReadDto) throws UserSaveException {
         User user = UserMapper.INSTANCE.toUser(userCreateReadDto);
-        LOGGER.info("try to save user {} service level", userCreateReadDto);
+        LOGGER.info("trying to save user {} service level", userCreateReadDto);
         try {
             UserDto userDto = UserMapper.INSTANCE.toUserDto(userRepository.save(user));
             LOGGER.info("user saved successfully service level");
             return userDto;
         } catch (Exception e) {
-            LOGGER.error("user wasn't save service level", e);
+            LOGGER.error("user not saved service level", e);
             throw new UserSaveException(e);
         }
     }
@@ -48,13 +48,13 @@ public class UserServiceImpl implements UserService {
     @Override
     @Transactional
     public List<UserCreateReadDto> findAll() throws UserFindAllException {
-        LOGGER.info("try to find all users service level");
+        LOGGER.info("trying to find all users service level");
         try {
             List<UserCreateReadDto> users = UserMapper.INSTANCE.toUserCreateReadDtoList(userRepository.findAll());
             LOGGER.info("users was found successfully service level");
             return users;
         } catch (Exception e) {
-            LOGGER.error("users wasn't found service level", e);
+            LOGGER.error("users weren't found service level", e);
             throw new UserFindAllException(e);
         }
     }
@@ -62,13 +62,13 @@ public class UserServiceImpl implements UserService {
     @Override
     @Transactional
     public Optional<UserCreateReadDto> findById(Integer id) {
-        LOGGER.info("try to find user by id {} service level", id);
+        LOGGER.info("trying to find user by id {} service level", id);
         return userRepository.findById(id).map(user -> {
             Optional<UserCreateReadDto> optionalUserCreateReadDto = Optional.of(UserMapper.INSTANCE.toUserCreateReadDto(user));
             LOGGER.info("user found successfully service level");
             return optionalUserCreateReadDto;
         }).orElseGet(() -> {
-            LOGGER.error("user wasn't to find service level");
+            LOGGER.error("user not found service level");
             return Optional.empty();
         });
 
@@ -77,7 +77,7 @@ public class UserServiceImpl implements UserService {
     @Override
     @Transactional(rollbackFor = UserUpdateException.class)
     public UserDto update(Integer id, UserCreateReadDto userCreateReadDto) throws UserUpdateException {
-        LOGGER.info("try to change user by id {} service level", id);
+        LOGGER.info("trying to change user by id {} service level", id);
         try {
             Optional<User> optionalUser = userRepository.findById(id);
             if (optionalUser.isEmpty()) throw new UserNotFoundException();
@@ -97,7 +97,7 @@ public class UserServiceImpl implements UserService {
     @Override
     @Transactional(rollbackFor = UserDeleteException.class)
     public void removeById(Integer id) throws UserDeleteException {
-        LOGGER.info("try to delete user by id {} service level", id);
+        LOGGER.info("trying to delete user by id {} service level", id);
         try {
             userRepository.deleteById(id);
             LOGGER.info("user was deleted successfully service level");
