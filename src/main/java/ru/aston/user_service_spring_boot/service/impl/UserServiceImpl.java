@@ -3,10 +3,13 @@ package ru.aston.user_service_spring_boot.service.impl;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.kafka.core.KafkaTemplate;
+import org.springframework.kafka.support.SendResult;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import ru.aston.user_service_spring_boot.exception.*;
 import ru.aston.user_service_spring_boot.mapper.UserMapper;
+import ru.aston.user_service_spring_boot.model.UserKafkaEvents;
 import ru.aston.user_service_spring_boot.model.dto.UserCreateReadDto;
 import ru.aston.user_service_spring_boot.model.dto.UserDto;
 import ru.aston.user_service_spring_boot.model.entity.User;
@@ -15,17 +18,19 @@ import ru.aston.user_service_spring_boot.service.UserService;
 
 import java.util.List;
 import java.util.Optional;
+import java.util.concurrent.CompletableFuture;
 
 @Service
 public class UserServiceImpl implements UserService {
 
     private final Logger LOGGER = LoggerFactory.getLogger(UserServiceImpl.class);
-
     private final UserRepository userRepository;
+    private final KafkaTemplate<String, String> kafkaTemplate;
 
     @Autowired
-    public UserServiceImpl(UserRepository userRepository) {
+    public UserServiceImpl(UserRepository userRepository, KafkaTemplate<String, String> kafkaTemplate) {
         this.userRepository = userRepository;
+        this.kafkaTemplate = kafkaTemplate;
     }
 
     @Override
@@ -35,6 +40,9 @@ public class UserServiceImpl implements UserService {
         LOGGER.info("trying to save user {} service level", userCreateReadDto);
         try {
             UserDto userDto = UserMapper.INSTANCE.toUserDto(userRepository.save(user));
+
+            sendAsyncKafkaMessage(UserKafkaEvents.CREATE, userDto.email());
+
             LOGGER.info("user saved successfully service level");
             return userDto;
         } catch (Exception e) {
@@ -97,11 +105,29 @@ public class UserServiceImpl implements UserService {
     public void removeById(Integer id) throws UserDeleteException {
         LOGGER.info("trying to delete user by id {} service level", id);
         try {
+            User deleteUser = userRepository.findById(id).map(user -> user).orElseThrow(() -> new UserDeleteException());
             userRepository.deleteById(id);
+
+            sendAsyncKafkaMessage(UserKafkaEvents.DELETE, deleteUser.getEmail());
+
             LOGGER.info("user was deleted successfully service level");
         } catch (Exception e) {
             LOGGER.error("user wasn't to deleted service level", e);
             throw new UserDeleteException(e);
         }
+    }
+
+    public void sendAsyncKafkaMessage(UserKafkaEvents userKafkaEvents, String email){
+        String kafkaMessage = userKafkaEvents + ":" + email;
+        LOGGER.info("trying to send message to kafka {}", kafkaMessage);
+        CompletableFuture<SendResult<String, String>> future =
+                kafkaTemplate.send("user-create-delete-events-topic", null, kafkaMessage);
+        future.whenComplete((result, exception) -> {
+            if (exception != null) {
+                LOGGER.error("Failed to send message to kafka {}", exception.getMessage());
+            } else {
+                LOGGER.info("Message sent to kafka successfully {}", result.getRecordMetadata());
+            }
+        });
     }
 }
