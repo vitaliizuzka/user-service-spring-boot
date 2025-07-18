@@ -1,5 +1,7 @@
 package ru.aston.user_service_spring_boot.service.impl;
 
+import lombok.NoArgsConstructor;
+import lombok.RequiredArgsConstructor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -14,6 +16,7 @@ import ru.aston.user_service_spring_boot.model.dto.UserCreateReadDto;
 import ru.aston.user_service_spring_boot.model.dto.UserDto;
 import ru.aston.user_service_spring_boot.model.entity.User;
 import ru.aston.user_service_spring_boot.repository.UserRepository;
+import ru.aston.user_service_spring_boot.service.KafkaPublisherService;
 import ru.aston.user_service_spring_boot.service.UserService;
 
 import java.util.List;
@@ -25,12 +28,11 @@ public class UserServiceImpl implements UserService {
 
     private final Logger LOGGER = LoggerFactory.getLogger(UserServiceImpl.class);
     private final UserRepository userRepository;
-    private final KafkaTemplate<String, String> kafkaTemplate;
+    private final KafkaPublisherService kafkaPublisherService;
 
-    @Autowired
-    public UserServiceImpl(UserRepository userRepository, KafkaTemplate<String, String> kafkaTemplate) {
+    public UserServiceImpl(UserRepository userRepository, KafkaPublisherService kafkaPublisherService) {
         this.userRepository = userRepository;
-        this.kafkaTemplate = kafkaTemplate;
+        this.kafkaPublisherService = kafkaPublisherService;
     }
 
     @Override
@@ -41,7 +43,7 @@ public class UserServiceImpl implements UserService {
         try {
             UserDto userDto = UserMapper.INSTANCE.toUserDto(userRepository.save(user));
 
-            sendAsyncKafkaMessage(UserKafkaEvents.CREATE, userDto.email());
+            kafkaPublisherService.sendAsyncKafkaMessage(UserKafkaEvents.CREATE, userDto.email());
 
             LOGGER.info("user saved successfully service level");
             return userDto;
@@ -105,29 +107,15 @@ public class UserServiceImpl implements UserService {
     public void removeById(Integer id) throws UserDeleteException {
         LOGGER.info("trying to delete user by id {} service level", id);
         try {
-            User deleteUser = userRepository.findById(id).map(user -> user).orElseThrow(() -> new UserDeleteException());
+            User deleteUser = userRepository.findById(id).orElseThrow(UserDeleteException::new);
             userRepository.deleteById(id);
 
-            sendAsyncKafkaMessage(UserKafkaEvents.DELETE, deleteUser.getEmail());
+            kafkaPublisherService.sendAsyncKafkaMessage(UserKafkaEvents.DELETE, deleteUser.getEmail());
 
             LOGGER.info("user was deleted successfully service level");
         } catch (Exception e) {
             LOGGER.error("user wasn't to deleted service level", e);
             throw new UserDeleteException(e);
         }
-    }
-
-    public void sendAsyncKafkaMessage(UserKafkaEvents userKafkaEvents, String email){
-        String kafkaMessage = userKafkaEvents + ":" + email;
-        LOGGER.info("trying to send message to kafka {}", kafkaMessage);
-        CompletableFuture<SendResult<String, String>> future =
-                kafkaTemplate.send("user-create-delete-events-topic", null, kafkaMessage);
-        future.whenComplete((result, exception) -> {
-            if (exception != null) {
-                LOGGER.error("Failed to send message to kafka {}", exception.getMessage());
-            } else {
-                LOGGER.info("Message sent to kafka successfully {}", result.getRecordMetadata());
-            }
-        });
     }
 }
