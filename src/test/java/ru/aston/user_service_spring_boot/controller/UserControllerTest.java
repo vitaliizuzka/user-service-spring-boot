@@ -38,8 +38,8 @@ class UserControllerTest {
     @Test
     void findAllShouldSizeEqualsTwo() throws Exception {
         List<UserCreateReadDto> users = List.of(
-                new UserCreateReadDto("Ignat", "ignat@gmail.com", 27),
-                new UserCreateReadDto("Vika", "vika@mail.ru", 30)
+                new UserCreateReadDto(1,"Ignat", "ignat@gmail.com", 27),
+                new UserCreateReadDto(2,"Vika", "vika@mail.ru", 30)
         );
 
         Mockito.when(userService.findAll()).thenReturn(users);
@@ -59,7 +59,7 @@ class UserControllerTest {
 
     @Test
     void findByIdShouldFindUser() throws Exception {
-        UserCreateReadDto user = new UserCreateReadDto("Ignat", "ignat@gmail.com", 35);
+        UserCreateReadDto user = new UserCreateReadDto(1,"Ignat", "ignat@gmail.com", 35);
         Mockito.when(userService.findById(1)).thenReturn(Optional.of(user));
 
         mockMvc.perform(MockMvcRequestBuilders.get("/users/1"))
@@ -78,7 +78,7 @@ class UserControllerTest {
 
     @Test
     void createShouldCreateUser() throws Exception {
-        UserCreateReadDto userCreateReadDto = new UserCreateReadDto("Ignat", "ignat@gmail.com", 35);
+        UserCreateReadDto userCreateReadDto = new UserCreateReadDto(1, "Ignat", "ignat@gmail.com", 35);
         UserDto createdDto = new UserDto(1, "Ignat", "ignat@gmail.com", 35, LocalDateTime.now());
 
         Mockito.when(userService.save(userCreateReadDto)).thenReturn(createdDto);
@@ -94,7 +94,7 @@ class UserControllerTest {
 
     @Test
     void createShouldNotCreateUser() throws Exception {
-        UserCreateReadDto userCreateReadDto = new UserCreateReadDto("Ignat", "ignat@gmail.com", 35);
+        UserCreateReadDto userCreateReadDto = new UserCreateReadDto(1, "Ignat", "ignat@gmail.com", 35);
 
         Mockito.when(userService.save(userCreateReadDto))
                 .thenThrow(new UserSaveException());
@@ -125,7 +125,7 @@ class UserControllerTest {
 
     @Test
     void updateShouldUpdateUser() throws Exception {
-        UserCreateReadDto userCreateReadDto = new UserCreateReadDto("Vik", "vik@gmail.com", 78);
+        UserCreateReadDto userCreateReadDto = new UserCreateReadDto(1,"Vik", "vik@gmail.com", 78);
         UserDto updatedDto = new UserDto(1, "Vik", "vik@gmail.com", 78, LocalDateTime.now());
 
         Mockito.when(userService.update(1, userCreateReadDto))
@@ -143,7 +143,7 @@ class UserControllerTest {
 
     @Test
     void updateShouldNotUpdateUser() throws Exception {
-        UserCreateReadDto userCreateReadDto = new UserCreateReadDto("Vik", "vik@gmail.com", 78);
+        UserCreateReadDto userCreateReadDto = new UserCreateReadDto(1, "Vik", "vik@gmail.com", 78);
 
         Mockito.when(userService.update(10, userCreateReadDto))
                 .thenThrow(new UserUpdateException());
