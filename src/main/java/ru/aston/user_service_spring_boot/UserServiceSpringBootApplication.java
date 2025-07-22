@@ -5,7 +5,6 @@ import org.springframework.boot.autoconfigure.SpringBootApplication;
 
 @SpringBootApplication
 public class UserServiceSpringBootApplication {
-
     public static void main(String[] args) {
         var context =  SpringApplication.run(UserServiceSpringBootApplication.class, args);
     }
