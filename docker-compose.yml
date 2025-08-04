@@ -1,0 +1,169 @@
+version: "3.8"
+
+services:
+  kafka-1:
+    image: bitnami/kafka:latest
+    container_name: kafka-1
+    depends_on:
+      - config-server
+    ports:
+      - "9092:9092"  # внешний порт
+    environment:
+      - KAFKA_CFG_NODE_ID=1
+      - KAFKA_KRAFT_CLUSTER_ID=PVjHlx7ESeesq55jeB6Efw
+      - KAFKA_CFG_PROCESS_ROLES=controller,broker
+      - KAFKA_CFG_CONTROLLER_QUORUM_VOTERS=1@kafka-1:9091,2@kafka-2:9091,3@kafka-3:9091
+      - KAFKA_CFG_LISTENERS=PLAINTEXT://0.0.0.0:9090,CONTROLLER://0.0.0.0:9091,EXTERNAL://0.0.0.0:9092
+      - KAFKA_CFG_ADVERTISED_LISTENERS=PLAINTEXT://kafka-1:9090,EXTERNAL://kafka-1:9092
+      - KAFKA_CFG_LISTENER_SECURITY_PROTOCOL_MAP=CONTROLLER:PLAINTEXT,EXTERNAL:PLAINTEXT,PLAINTEXT:PLAINTEXT
+      - KAFKA_CFG_CONTROLLER_LISTENER_NAMES=CONTROLLER
+      - KAFKA_CFG_INTER_BROKER_LISTENER_NAME=PLAINTEXT
+    volumes:
+      - ./volumes/server-1:/bitnami/kafka
+    networks:
+      - my_network
+
+  kafka-2:
+    image: bitnami/kafka:latest
+    container_name: kafka-2
+    depends_on:
+      - config-server
+    ports:
+      - "9094:9094"
+    environment:
+      - KAFKA_CFG_NODE_ID=2
+      - KAFKA_KRAFT_CLUSTER_ID=PVjHlx7ESeesq55jeB6Efw
+      - KAFKA_CFG_PROCESS_ROLES=controller,broker
+      - KAFKA_CFG_CONTROLLER_QUORUM_VOTERS=1@kafka-1:9091,2@kafka-2:9091,3@kafka-3:9091
+      - KAFKA_CFG_LISTENERS=PLAINTEXT://0.0.0.0:9090,CONTROLLER://0.0.0.0:9091,EXTERNAL://0.0.0.0:9094
+      - KAFKA_CFG_ADVERTISED_LISTENERS=PLAINTEXT://kafka-2:9090,EXTERNAL://kafka-2:9094
+      - KAFKA_CFG_LISTENER_SECURITY_PROTOCOL_MAP=CONTROLLER:PLAINTEXT,EXTERNAL:PLAINTEXT,PLAINTEXT:PLAINTEXT
+      - KAFKA_CFG_CONTROLLER_LISTENER_NAMES=CONTROLLER
+      - KAFKA_CFG_INTER_BROKER_LISTENER_NAME=PLAINTEXT
+    volumes:
+      - ./volumes/server-2:/bitnami/kafka
+    networks:
+      - my_network
+
+  kafka-3:
+    image: bitnami/kafka:latest
+    container_name: kafka-3
+    depends_on:
+      - config-server
+    ports:
+      - "9096:9096"
+    environment:
+      - KAFKA_CFG_NODE_ID=3
+      - KAFKA_KRAFT_CLUSTER_ID=PVjHlx7ESeesq55jeB6Efw
+      - KAFKA_CFG_PROCESS_ROLES=controller,broker
+      - KAFKA_CFG_CONTROLLER_QUORUM_VOTERS=1@kafka-1:9091,2@kafka-2:9091,3@kafka-3:9091
+      - KAFKA_CFG_LISTENERS=PLAINTEXT://0.0.0.0:9090,CONTROLLER://0.0.0.0:9091,EXTERNAL://0.0.0.0:9096
+      - KAFKA_CFG_ADVERTISED_LISTENERS=PLAINTEXT://kafka-3:9090,EXTERNAL://kafka-3:9096
+      - KAFKA_CFG_LISTENER_SECURITY_PROTOCOL_MAP=CONTROLLER:PLAINTEXT,EXTERNAL:PLAINTEXT,PLAINTEXT:PLAINTEXT
+      - KAFKA_CFG_CONTROLLER_LISTENER_NAMES=CONTROLLER
+      - KAFKA_CFG_INTER_BROKER_LISTENER_NAME=PLAINTEXT
+    volumes:
+      - ./volumes/server-3:/bitnami/kafka
+    networks:
+      - my_network
+
+  postgres:
+    image: postgres:15
+    container_name: postgres
+    depends_on:
+      - config-server
+    environment:
+      SPRING_CLOUD_CONFIG_FAIL_FAST: false
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+      POSTGRES_DB: usersdb
+    ports:
+      - "5432:5432"
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    networks:
+      - my_network
+
+  config-server:
+    image: zuzkait/config-server
+    container_name: config-server
+    ports:
+      - "8888:8888"
+    networks:
+      - my_network
+
+  discovery-service:
+    image: zuzkait/discovery-service
+    container_name: discovery-service
+    environment:
+      SPRING_CLOUD_CONFIG_FAIL_FAST: false
+    depends_on:
+      - config-server
+    ports:
+      - "8761:8761"
+    networks:
+      - my_network
+
+  api-gateway:
+    image: zuzkait/api-gateway
+    container_name: api-gateway
+    environment:
+      SPRING_CLOUD_CONFIG_FAIL_FAST: false
+    depends_on:
+      - discovery-service
+      - config-server
+    ports:
+      - "8080:8080"
+    networks:
+      - my_network
+
+  user-service:
+    image: zuzkait/user-service
+    container_name: user-service
+    depends_on:
+      - kafka-1
+      - kafka-2
+      - kafka-3
+      - config-server
+      - discovery-service
+      - postgres
+      - api-gateway
+    ports:
+      - "8081:8081"
+    environment:
+      SPRING_CLOUD_CONFIG_FAIL_FAST: false
+      SPRING_DATASOURCE_URL: jdbc:postgresql://postgres:5432/usersdb
+      SPRING_DATASOURCE_USERNAME: postgres
+      SPRING_DATASOURCE_PASSWORD: postgres
+      SPRING_KAFKA_BOOTSTRAP_SERVERS: kafka-1:9090
+      SPRING_CLOUD_CONFIG_URI: http://config-server:8888
+      EUREKA_CLIENT_SERVICEURL_DEFAULTZONE: http://discovery-service:8761/eureka/
+    networks:
+      - my_network
+
+  notification-service:
+    image: zuzkait/notification-service
+    container_name: notification-service
+    depends_on:
+      - kafka-1
+      - kafka-2
+      - kafka-3
+      - config-server
+      - discovery-service
+      - api-gateway
+    ports:
+      - "8082:8082"
+    environment:
+      SPRING_CLOUD_CONFIG_FAIL_FAST: false
+      SPRING_KAFKA_BOOTSTRAP_SERVERS: kafka-1:9090
+      SPRING_CLOUD_CONFIG_URI: http://config-server:8888
+      EUREKA_CLIENT_SERVICEURL_DEFAULTZONE: http://discovery-service:8761/eureka/
+    networks:
+      - my_network
+
+volumes:
+  pgdata:
+
+networks:
+  my_network:
+    external: true
